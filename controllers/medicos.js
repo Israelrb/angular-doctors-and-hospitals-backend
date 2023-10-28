@@ -2,6 +2,7 @@ const { response } = require('express');
 
 const Medico = require('../models/medico');
 
+
 const getMedicos = async (req, res = response) => {
     
     const medicos = await Medico.find()
@@ -103,9 +104,77 @@ const borrarMedico = async (req, res = response) => {
 }
 
 
+const getEspecialidades = async (req, res = response) => {
+    try {
+        const usuarios = await prisma.usuario.findMany({
+          select: {
+            nombre: true, // Selecciona el campo "nombre"
+          },
+        });
+        return usuarios;
+      } catch (error) {
+        throw new Error('Error al obtener los nombres de usuarios: ' + error.message);
+      } finally {
+        await prisma.$disconnect();
+      }
+
+    
+    
+    // try {
+    //     const counts = await YourModel.aggregate([
+    //         { $group: { _id: "especialidades", count: { $sum: 1 } } }
+    //       ]);
+    //       res.send(counts);
+    // } catch (error) {
+    //     console.log(error);
+    //     res.status(500).json({
+    //         ok: false,
+    //         msg: 'Hable con el administrador del backend'
+    //     })
+    // }
+
+    // try {
+    //     const counts = await YourModel.aggregate([
+    //         { $group: { _id: "$tipo", count: { $sum: 1 } } }
+    //       ]);
+    //       res.send(counts);
+    // } catch (error) {
+    //     console.log(error);
+    //     res.status(500).json({
+    //         ok: false,
+    //         msg: 'Hable con el administrador del backend'
+    //     })
+    // }
+}
+
+const getMedicoById = async (req, res = response) => {
+    const id = req.params.id;
+
+    try {
+        const medico = await Medico.findById(id)
+                                .populate('usuario', 'nombre apellidos img')
+                                .populate('hospital', 'nombre img');
+        res.json({
+            ok: true,
+            medico
+        })
+    } catch (error) {
+        console.log(error);
+        res.json({
+            ok: false,
+            msg: 'Hable con el administrador'
+        })
+    }
+
+    
+}
+
+
 module.exports = {
     getMedicos,
     creartMedico,
     actualizarMedico,
-    borrarMedico
+    borrarMedico,
+    getEspecialidades,
+    getMedicoById
 }
